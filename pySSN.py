@@ -5,12 +5,9 @@
 # Calculates tSNEs or UMAPs
 
 from Bio import SeqIO
-from Bio.Seq import Seq
-from Bio.SeqRecord import SeqRecord
 from skbio.alignment import StripedSmithWaterman
 import multiprocessing
 import itertools
-import os
 import numpy as np
 from matplotlib import pyplot as plt
 import argparse
