@@ -30,8 +30,8 @@ parser.add_argument('-i', '--input', type=str, help="""Please provide one of the
                                                       FASTA: List of records to calculate distance matrix from.\n
                                                       CSV: Distance matrix checkpoint.
                                                       NPY: Reducer embeddings checkpoint.
-                                                      """)
-parser.add_argument('--metric', type=str, choices=['Levenshtein','Alignment'], help='Metic used for distance calculation: Levenshtein or Alignment. Use Levenshtein for close sequences and Alignment for less homologous sequences.')
+                                                      """, required=True)
+parser.add_argument('--metric', type=str, choices=['Levenshtein','Alignment'], default='Alignment', help='Metic used for distance calculation: Levenshtein or Alignment. Use Levenshtein for close sequences and Alignment for less homologous sequences.')
 parser.add_argument('--grouping', type=str, help='TXT file for group information. Can be used to color the SSN.')
 parser.add_argument('--reducer', type=str, choices=['UMAP','tSNE'], default="UMAP", help='Choice of dimensionality reduction method: UMAP or tSNE. Defaults to UMAP.')
 
