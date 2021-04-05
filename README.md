@@ -50,8 +50,10 @@ This one nicely shows the clusters emerging over the course of directed evolutio
 
 `python pySSN.py -i evolved_variants-tSNEcheckpoint.npy --grouping evolved_variants_groupings.txt`
 
+<p align="center">
+<img src="https://raw.githubusercontent.com/pauljannis/pySSN/main/Example1/evolved_variants-tSNE.png" alt="pySSN tSNE of evolved variants" width="485" height="482"/>
+</p>
 
-<img src="https://raw.githubusercontent.com/pauljannis/pySSN/main/Example1/evolved_variants-tSNE.png" align="middle" alt="pySSN tSNE of evolved variants" width="485" height="482"/>
 
 
 ## Example 2
@@ -61,5 +63,6 @@ We have a protein sequence of interest (in this case a phenylalanine dehydrogena
 
 We get a nice UMAP representation of the sequence space and might want to look further into the clusters by coloring interesting clades, as exemplified in Example 1.
 
-
+<p align="center">
 <img src="https://raw.githubusercontent.com/pauljannis/pySSN/main/Example2/PheDH_250_UniRef90-UMAP.png" align="middle" alt="pySSN UMAP of PheDH sequence space" width="485" height="482"/>
+</p>
