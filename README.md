@@ -51,6 +51,9 @@ This one nicely shows the clusters emerging over the course of directed evolutio
 `python pySSN.py -i evolved_variants-tSNEcheckpoint.npy --grouping evolved_variants_groupings.txt`
 
 
+[pySSN tSNE of evolved variants](https://raw.githubusercontent.com/pauljannis/pySSN/main/Example1/evolved_variants-tSNE.png)
+
+
 
 ## Example 2
 We have a protein sequence of interest (in this case a phenylalanine dehydrogenase ID Q59771) and want to generate a sequence similarity network. First, we look for homologous sequences by blasting the UniRef90 database and taking a total of 250 hits. Those are our input as _PheDH_250_UniRef90.fasta_. We want to align those sequences, because they could be quite dissimilar. Also, a UMAP might look pretty. Thus:
@@ -58,3 +61,6 @@ We have a protein sequence of interest (in this case a phenylalanine dehydrogena
 `python pySSN.py -i PheDH_250_UniRef90.fasta --metric Alignment --reducer UMAP`
 
 We get a nice UMAP representation of the sequence space and might want to look further into the clusters by coloring interesting clades, as exemplified in Example 1.
+
+
+[pySSN UMAP of PheDH sequence space](https://raw.githubusercontent.com/pauljannis/pySSN/main/Example2/PheDH_250_UniRef90-UMAP.png)
