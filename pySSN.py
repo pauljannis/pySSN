@@ -3,6 +3,7 @@
 #17/03/2021 v 1.0
 # Calculates SSW alignments or Levensthein distance matrices
 # Calculates tSNEs or UMAPs
+# Generated checkpoints along the way
 
 from Bio import SeqIO
 from skbio.alignment import StripedSmithWaterman
@@ -16,6 +17,7 @@ from Levenshtein import distance as LevenDist
 import pandas as pd
 import seaborn as sns
 import umap
+from sklearn.manifold import TSNE
 sns.set(style='white', context='notebook', rc={'figure.figsize':(6,6)})
 
 
@@ -27,10 +29,11 @@ parser.add_argument('-v', '--version', action='version', version='1.0')
 parser.add_argument('-i', '--input', type=str, help="""Please provide one of the following input files:\n 
                                                       FASTA: List of records to calculate distance matrix from.\n
                                                       CSV: Distance matrix checkpoint.
-                                                      NPY: UMAP embeddings checkpoint.
+                                                      NPY: Reducer embeddings checkpoint.
                                                       """)
 parser.add_argument('--metric', type=str, choices=['Levenshtein','Alignment'], help='Metic used for distance calculation: Levenshtein or Alignment. Use Levenshtein for close sequences and Alignment for less homologous sequences.')
-parser.add_argument('--grouping', type=str, help='TXT file as a list group information. Can be used for coloring the SSN.')
+parser.add_argument('--grouping', type=str, help='TXT file for group information. Can be used to color the SSN.')
+parser.add_argument('--reducer', type=str, choices=['UMAP','tSNE'], default="UMAP", help='Choice of dimensionality reduction method: UMAP or tSNE. Defaults to UMAP.')
 
 
 #Parse arguments
@@ -38,6 +41,7 @@ args = parser.parse_args()
 threads = args.threads
 metric = args.metric
 grouping = args.grouping
+reducer = args.reducer
 
 if threads == 0:
     threads = multiprocessing.cpu_count()
@@ -102,22 +106,26 @@ def LevDistMat(records):
     for i in tqdm(range(N_rec)):
         ref = rec_lst.pop(0)
         score_lst = pool.starmap(LevenDist, zip(itertools.repeat(ref), rec_lst))
-        if max(score_lst) > max_dist:
-            max_dist = max(score_lst)
+        m = max(score_lst, default=0)
+        if m > max_dist:
+            max_dist = m
         score_lst_lst.append(score_lst)
     pool.close()
     #Scale 0-1
     for i in range(len(score_lst_lst)):
         for j in range(len(score_lst_lst[i])):
             score_lst_lst[i][j] = score_lst_lst[i][j] / max_dist
-    print('finished generating the alignment score matrix')
+    print('finished generating the levenshtein score matrix')
     return score_lst_lst
 
 
-def calc_UMAP(DM):
-    reducer = umap.UMAP(metric="precomputed")
-    embedding = reducer.fit_transform(DM)
-    np.save(f"{name}-UMAPcheckpoint.npy", embedding, allow_pickle=True)
+def calc_reduction(DM):
+    if reducer == "UMAP":
+        model = umap.UMAP(metric="precomputed")
+    elif reducer == "tSNE":
+        model = TSNE(n_components=2, metric="precomputed")
+    embedding = model.fit_transform(DM)
+    np.save(f"{name}-{reducer}checkpoint.npy", embedding, allow_pickle=True)
     return embedding
 
 def plot_scatter_colored(embedding):
@@ -132,13 +140,16 @@ def plot_scatter_colored(embedding):
             colors = [int(c) for c in colors]
         except Exception:
             pass
-    print(colors)
     plt.figure()
     plt.scatter(embedding[:,0], embedding[:,1], c=colors, s=1)
     plt.xticks([])
     plt.yticks([])
-    plt.savefig(f"{name}-UMAP.png", bbox_inches="tight", dpi=600)
+    plt.savefig(f"{name}-{reducer}.png", bbox_inches="tight", dpi=600)
 
+
+
+##############
+# RUN LOGIC
 
 if ftype == "fasta":
     if metric is None:
@@ -148,24 +159,21 @@ if ftype == "fasta":
     print(f"Calculating distance matrix via {metric}:")
     if metric == 'Alignment':
         DM = distance_matrix(records)
-        fullDM = convert_DM_tofull(DM)
-        fullDM = pd.DataFrame(fullDM)
-        fullDM.to_csv(f"{name}-DMcheckpoint.csv") 
     elif metric == 'Levenshtein':
-        DM = distance_matrix(records)
-        fullDM = convert_DM_tofull(DM)
-        fullDM = pd.DataFrame(fullDM)
-        fullDM.to_csv(f"{name}-DMcheckpoint.csv") 
-    #Get and plot UMAP
-    embeddings = calc_UMAP(fullDM)
+        DM = LevDistMat(records)
+    fullDM = convert_DM_tofull(DM)
+    fullDM = pd.DataFrame(fullDM)
+    fullDM.to_csv(f"{name}-{metric}DM-checkpoint.csv") 
+    #Get and plot UMAP/tSNE
+    embeddings = calc_reduction(fullDM)
     plot_scatter_colored(embeddings)
-elif ftype == "csv":
+elif ftype == "csv":  #From DM checkpoint
     print("Loading precomputed distance matrix")
     fullDM = pd.read_csv(input_file, index_col=0)
-    print("calculating UMAP embeddings")
-    embeddings = calc_UMAP(fullDM)
+    print("calculating embeddings")
+    embeddings = calc_reduction(fullDM)
     plot_scatter_colored(embeddings)
-elif ftype == "npy":
+elif ftype == "npy":  #From embeddings checkpoint (e.g. to re-color without re-calculation)
     embeddings = np.load(input_file, allow_pickle=True)
     plot_scatter_colored(embeddings)
 
