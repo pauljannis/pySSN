@@ -46,7 +46,7 @@ Our output are checkpoint files as well as the UMAP representation of the sequen
 
 `python pySSN.py -i evolved_variants-LevenshteinDM-checkpoint.csv --reducer tSNE`
 
-This one nicely shows the clusters emerging over the course of directed evolution. But why not add some color? We can assign color values to each point by passing a grouping file. We know from which of the three rounds of directed evolution each sequence originates and can assign a color accordingly in a simple txt file (see _evolved_variants_groupings.txt_). We'll use the tSNE checkpoint to not have to calculate everything again:
+This one nicely shows the clusters emerging over the course of directed evolution. But why not add some color? We can assign color values to each point by passing a grouping file. We know from which of the three rounds of directed evolution each sequence originates and can assign a color accordingly in a simple txt file ordered in the same way as the corresponding sequences fasta (see _evolved_variants_groupings.txt_). We'll use the tSNE checkpoint to not have to calculate everything again:
 
 `python pySSN.py -i evolved_variants-tSNEcheckpoint.npy --grouping evolved_variants_groupings.txt`
 
